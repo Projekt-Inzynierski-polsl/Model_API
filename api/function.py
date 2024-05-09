@@ -5,8 +5,7 @@ import json
 
 
 def send_request():
-    p = "D:/Databases/06/forms_obciete/a01-000u.png"  # ja to zapisałem tak jak powinienem, ale później jest z tym
-    # problem bo nie jestem konskwentny w stosowaniu tej inwersji gdzie biały jest tekst, a ciemne tło
+    p = "D:/Databases/06/forms_obciete/a01-000u.png"
     p = "C:/Users/Piotr/Desktop/IAM_img/a01-000u.png"
     # p = "C:/Users/Piotr/Desktop/IAM_img/imageimage3.png"
     # p = "C:/Users/Piotr/Desktop/IAM_img/a01-049.png"
