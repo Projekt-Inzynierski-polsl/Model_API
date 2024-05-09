@@ -64,9 +64,7 @@ def upload_image():
     image_file = request.files['image']
 
     json_data = request.form.get('json')
-    print(type(json_data))
     bounding_boxes = json.loads(json_data)['boundingBoxes']
-    print(type(bounding_boxes))
 
     image_data = image_file.read()
     nparr = np.frombuffer(image_data, np.uint8)
