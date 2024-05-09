@@ -46,7 +46,6 @@ def send_request():
     print(response.status_code)
 
 
-
 def main():
     send_request()
 
