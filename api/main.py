@@ -66,8 +66,11 @@ def upload_image():
     token_field = request.form.get('token')
     # response = requests.post(request.remote_addr + "/api/acount/token",
     #                          headers={'Authorization': f'Bearer {token_field}'})
-    # if response.status_code != 200:
-    #     return 'Authorization failed', 400
+
+    response = requests.post("http://ocr-api:8080/api/account/token",
+                             headers={'Authorization': f'Bearer {token_field}'})
+    if response.status_code != 200:
+        return 'Authorization failed', 400
 
     image_file = request.files['image']
 
