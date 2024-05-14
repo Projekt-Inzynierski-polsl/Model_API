@@ -45,7 +45,7 @@ def create_final_output(outputs, coords):
             'coordinates': coords_dicts[i],
             'lines': outputs[i]
         })
-    return jsonify({'boundingBoxes': decoded_output})
+    return jsonify(decoded_output)
 
 
 @app.route('/upload_image', methods=['POST'])
