@@ -15,10 +15,10 @@ def convert_to_dict(coords):
     coords_dicts = []
     for coords in coords:
         coords_dicts.append({
-            "x1": coords[0],
-            "y1": coords[1],
-            "x2": coords[2],
-            "y2": coords[3]
+            "leftX": coords[0],
+            "leftY": coords[1],
+            "rightX": coords[2],
+            "rightY": coords[3]
         })
     return coords_dicts
 
@@ -30,7 +30,11 @@ def create_output(outputs, coords):
     for i in range(len(outputs)):
         decoded_output.append({
             'content': str(outputs[i][0]),
-            'coordinates': coords_dicts[i]
+            'leftX': coords_dicts[i]['leftX'],
+            'leftY': coords_dicts[i]['leftY'],
+            'rightX': coords_dicts[i]['rightX'],
+            'rightY': coords_dicts[i]['rightY']
+            # 'coordinates': coords_dicts[i]
         })
     # return jsonify({'decoded outputs': decoded_output})
     return decoded_output
@@ -42,7 +46,11 @@ def create_final_output(outputs, coords):
     decoded_output = []
     for i in range(len(coords)):
         decoded_output.append({
-            'coordinates': coords_dicts[i],
+            # 'coordinates': coords_dicts[i],
+            'leftX': coords_dicts[i]['leftX'],
+            'leftY': coords_dicts[i]['leftY'],
+            'rightX': coords_dicts[i]['rightX'],
+            'rightY': coords_dicts[i]['rightY'],
             'lines': outputs[i]
         })
     return jsonify(decoded_output)
