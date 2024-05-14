@@ -29,11 +29,11 @@ def create_output(outputs, coords):
     decoded_output = []
     for i in range(len(outputs)):
         decoded_output.append({
-            'text': outputs[i],
-            'coords': coords_dicts[i]
+            'content': str(outputs[i][0]),
+            'coordinates': coords_dicts[i]
         })
     # return jsonify({'decoded outputs': decoded_output})
-    return {'decoded outputs': decoded_output}
+    return decoded_output
 
 
 def create_final_output(outputs, coords):
@@ -42,10 +42,10 @@ def create_final_output(outputs, coords):
     decoded_output = []
     for i in range(len(coords)):
         decoded_output.append({
-            'coords': coords_dicts[i],
-            'output': outputs[i]
+            'coordinates': coords_dicts[i],
+            'lines': outputs[i]
         })
-    return jsonify({'image output': decoded_output})
+    return jsonify({'boundingBoxes': decoded_output})
 
 
 @app.route('/upload_image', methods=['POST'])
@@ -112,3 +112,7 @@ def upload_image():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
+
+
+{'image output': [{'coords': {'x1': 0, 'x2': 1800, 'y1': 0, 'y2': 378}, 'output': {'decoded outputs': [{'coords': {'x1': 221, 'x2': 1491, 'y1': 281, 'y2': 372}, 'text': ['industrie|,|"|Mr.|Brown|commented|icily|.|"|letus|have|a']}, {'coords': {'x1': 213, 'x2': 1491, 'y1': 158, 'y2': 249}, 'text': ['childrens|and|sick|people|than|to|take|onthis|vast']}, {'coords': {'x1': 205, 'x2': 1483, 'y1': 26, 'y2': 121}, 'text': ['|"Mr.|Powell|finds|iteasier|to|take|itout|of|mothers|,']}]}}]}

@@ -11,6 +11,7 @@ def send_request():
     # p = "C:/Users/Piotr/Desktop/IAM_img/a01-049.png"
     # p = "C:/Users/Piotr/Desktop/IAM_img/linie1.jpg"
     p = "C:/Users/Piotr/Desktop/IAM_img/test_image.png"
+    p = "C:/Users/Piotr/Desktop/dataset-cover.png"
 
     with open(p, 'rb') as f:
         img = f.read()
@@ -22,16 +23,8 @@ def send_request():
                 "coords": {
                     "x1": 0,
                     "y1": 0,
-                    "x2": 2390,
-                    "y2": 1250
-                }
-            },
-            {
-                "coords": {
-                    "x1": 0,
-                    "y1": 1280,
-                    "x2": 2390,
-                    "y2": 2500
+                    "x2": 1800,
+                    "y2": 378
                 }
             }
         ]
