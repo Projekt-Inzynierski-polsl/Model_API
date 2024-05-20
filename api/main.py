@@ -72,7 +72,7 @@ def upload_image():
     # response = requests.post(request.remote_addr + "/api/acount/token",
     #                          headers={'Authorization': f'Bearer {token_field}'})
 
-    response = requests.post(auth_path, headers={'Authorization': f'Bearer {token_field}'})
+    response = requests.get(auth_path, headers={'Authorization': f'Bearer {token_field}'})
     if response.status_code != 200:
         return 'Authorization failed', 400
 
@@ -127,11 +127,3 @@ def upload_image():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
-{'image output': [{'coords': {'x1': 0, 'x2': 1800, 'y1': 0, 'y2': 378}, 'output': {'decoded outputs': [
-    {'coords': {'x1': 221, 'x2': 1491, 'y1': 281, 'y2': 372},
-     'text': ['industrie|,|"|Mr.|Brown|commented|icily|.|"|letus|have|a']},
-    {'coords': {'x1': 213, 'x2': 1491, 'y1': 158, 'y2': 249},
-     'text': ['childrens|and|sick|people|than|to|take|onthis|vast']},
-    {'coords': {'x1': 205, 'x2': 1483, 'y1': 26, 'y2': 121},
-     'text': ['|"Mr.|Powell|finds|iteasier|to|take|itout|of|mothers|,']}]}}]}
