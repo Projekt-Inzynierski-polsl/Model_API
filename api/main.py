@@ -61,7 +61,6 @@ def upload_image():
     if 'image' not in request.files:
         return 'No image uploaded', 400
 
-    # zapytaj Kube jak to ma wyglądać dokładnie
     environment = request.form.get('environment')
     if environment == "Debug":
         auth_path = "http://localhost:8051/api/account/token"
@@ -69,8 +68,6 @@ def upload_image():
         auth_path = "http://ocr-api:8080/api/account/token"
 
     token_field = request.form.get('token')
-    # response = requests.post(request.remote_addr + "/api/acount/token",
-    #                          headers={'Authorization': f'Bearer {token_field}'})
 
     response = requests.get(auth_path, headers={'Authorization': f'Bearer {token_field}'})
     if response.status_code != 200:
