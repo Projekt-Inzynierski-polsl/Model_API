@@ -4,10 +4,17 @@ from torchvision import transforms
 from PIL import Image
 from sklearn import preprocessing
 import numpy as np
-import os
+import re
 
 import Model
 import Decoder
+
+
+def change_output(decoded_line):
+    decoded_line = decoded_line[0].replace("|", " ").strip()
+    decoded_line = re.sub(r'\s+([,.:;?!])', r'\1', decoded_line)
+
+    return decoded_line
 
 
 def encode_labels(targets):
@@ -69,5 +76,5 @@ def call_model(segmented_image):
                'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
                'u', 'v', 'w', 'x', 'y', 'z', '|']
     dec_output = decoder.decode([output], classes)
-    # print(dec_output)
-    return dec_output
+    dec_output1 = [change_output(dec_output)]
+    return dec_output1
