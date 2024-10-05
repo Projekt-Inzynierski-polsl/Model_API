@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/2e563a0d-e036-46e9-a5ff-b624198a698a/resourceGroups/appsvc_linux_centralus_basic/providers/Microsoft.Web/sites/system-ocr-model-api",
+    "appService.deploySubpath": "."
+}
