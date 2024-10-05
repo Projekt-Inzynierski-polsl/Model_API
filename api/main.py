@@ -14,12 +14,14 @@ app = Flask(__name__)
 def convert_to_dict(coords):
     coords_dicts = []
     for coords in coords:
-        coords_dicts.append({
-            "leftX": coords[0],
-            "leftY": coords[1],
-            "rightX": coords[2],
-            "rightY": coords[3]
-        })
+        coords_dicts.append(
+            {
+                "leftX": coords[0],
+                "leftY": coords[1],
+                "rightX": coords[2],
+                "rightY": coords[3],
+            }
+        )
     return coords_dicts
 
 
@@ -28,14 +30,16 @@ def create_output(outputs, coords):
 
     decoded_output = []
     for i in range(len(outputs)):
-        decoded_output.append({
-            'content': str(outputs[i][0]),
-            'leftX': coords_dicts[i]['leftX'],
-            'leftY': coords_dicts[i]['leftY'],
-            'rightX': coords_dicts[i]['rightX'],
-            'rightY': coords_dicts[i]['rightY']
-            # 'coordinates': coords_dicts[i]
-        })
+        decoded_output.append(
+            {
+                "content": str(outputs[i][0]),
+                "leftX": coords_dicts[i]["leftX"],
+                "leftY": coords_dicts[i]["leftY"],
+                "rightX": coords_dicts[i]["rightX"],
+                "rightY": coords_dicts[i]["rightY"],
+                # 'coordinates': coords_dicts[i]
+            }
+        )
     # return jsonify({'decoded outputs': decoded_output})
     return decoded_output
 
@@ -45,38 +49,44 @@ def create_final_output(outputs, coords):
 
     decoded_output = []
     for i in range(len(coords)):
-        decoded_output.append({
-            # 'coordinates': coords_dicts[i],
-            'leftX': coords_dicts[i]['leftX'],
-            'leftY': coords_dicts[i]['leftY'],
-            'rightX': coords_dicts[i]['rightX'],
-            'rightY': coords_dicts[i]['rightY'],
-            'lines': outputs[i]
-        })
+        decoded_output.append(
+            {
+                # 'coordinates': coords_dicts[i],
+                "leftX": coords_dicts[i]["leftX"],
+                "leftY": coords_dicts[i]["leftY"],
+                "rightX": coords_dicts[i]["rightX"],
+                "rightY": coords_dicts[i]["rightY"],
+                "lines": outputs[i],
+            }
+        )
     return jsonify(decoded_output)
 
 
-@app.route('/upload_image', methods=['POST'])
+@app.route("/upload_image", methods=["POST"])
 def upload_image():
-    if 'image' not in request.files:
-        return 'No image uploaded', 400
+    if "image" not in request.files:
+        return "No image uploaded", 400
 
-    environment = request.form.get('environment')
+    environment = request.form.get("environment")
     if environment == "Debug":
         auth_path = "http://localhost:8051/api/account/token"
-    else:
+    elif environment == "Development":
         auth_path = "http://ocr-api:8080/api/account/token"
+    elif environment == "Production":
+        auth_path = "api-ocr-dev.azurewebsites.net"
 
-    token_field = request.form.get('token')
+    token_field = request.form.get("token")
 
-    response = requests.get(auth_path, headers={'Authorization': f'Bearer {token_field}'})
+    response = requests.get(
+        auth_path, headers={"Authorization": f"Bearer {token_field}"}
+    )
     if response.status_code != 200:
-        return 'Authorization failed', 400
+        return "Authorization failed", 400
 
-    image_file = request.files['image']
+    image_file = request.files["image"]
 
-    json_data = request.form.get('json')
-    bounding_boxes = json.loads(json_data)['boundingBoxes']
+    json_data = request.form.get("json")
+    bounding_boxes = json.loads(json_data)["boundingBoxes"]
 
     image_data = image_file.read()
     nparr = np.frombuffer(image_data, np.uint8)
@@ -92,21 +102,30 @@ def upload_image():
 
     image_contours, json_outputs = [], []
     for box in bounding_boxes:
-        temp_coords = box['coords']
-        x1, y1, x2, y2 = temp_coords['x1'], temp_coords['y1'], temp_coords['x2'], temp_coords['y2']
+        temp_coords = box["coords"]
+        x1, y1, x2, y2 = (
+            temp_coords["x1"],
+            temp_coords["y1"],
+            temp_coords["x2"],
+            temp_coords["y2"],
+        )
 
         temp_binary_image = binary_image[y1:y2, x1:x2]
         temp_segmented_image = segmentation.segment_image(temp_binary_image)
 
-        contours, _ = cv2.findContours(temp_segmented_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(
+            temp_segmented_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+        )
         extracted_lines, extracted_contours, extracted_outputs = [], [], []
 
         for i, contour in enumerate(contours):
             contour_mask = np.zeros_like(temp_segmented_image)
             cv2.drawContours(contour_mask, [contour], 0, 255, -1)
-            text_line = cv2.bitwise_and(temp_binary_image, temp_binary_image, mask=contour_mask)
+            text_line = cv2.bitwise_and(
+                temp_binary_image, temp_binary_image, mask=contour_mask
+            )
             x, y, w, h = cv2.boundingRect(contour)
-            text_line_cropped = text_line[y:y + h, x:x + w]
+            text_line_cropped = text_line[y : y + h, x : x + w]
             if cv2.contourArea(contour) >= 1500:
                 extracted_lines.append(text_line_cropped)
                 extracted_contours.append([x, y, x + w, y + h])
