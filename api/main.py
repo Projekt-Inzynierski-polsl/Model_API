@@ -73,7 +73,7 @@ def upload_image():
     elif environment == "Development":
         auth_path = "http://ocr-api:8080/api/account/token"
     elif environment == "Production":
-        auth_path = "api-ocr-dev.azurewebsites.net"
+        auth_path = "https://api-ocr-dev.azurewebsites.net/api/account/token"
 
     token_field = request.form.get("token")
 
