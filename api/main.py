@@ -3,10 +3,11 @@ import numpy as np
 import json
 import cv2
 import requests
-import os
+from PIL import Image
 
-import segmentation
-import inference
+
+import seg
+import ocr
 
 app = Flask(__name__)
 
@@ -40,7 +41,6 @@ def create_output(outputs, coords):
                 # 'coordinates': coords_dicts[i]
             }
         )
-    # return jsonify({'decoded outputs': decoded_output})
     return decoded_output
 
 
@@ -62,10 +62,29 @@ def create_final_output(outputs, coords):
     return jsonify(decoded_output)
 
 
+def extract_text_regions(segmentation_mask, original_image):
+    contours, _ = cv2.findContours(
+        segmentation_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    )
+
+    text_regions = []
+    coords = []
+    for contour in contours:
+        # Get bounding box for each contour
+        x, y, w, h = cv2.boundingRect(contour)
+
+        # Crop the region from the original image
+        cropped_region = original_image[y : y + h, x : x + w]
+        text_regions.append(cropped_region)
+        coords.append([x, y, x + w, y + h])
+
+    return text_regions, coords
+
+
 @app.route("/upload_image", methods=["POST"])
 def upload_image():
     if "image" not in request.files:
-        return "No image uploaded", 400
+        return jsonify({"error": "No image uploaded"}), 400
 
     environment = request.form.get("environment")
     if environment == "Debug":
@@ -88,17 +107,7 @@ def upload_image():
     json_data = request.form.get("json")
     bounding_boxes = json.loads(json_data)["boundingBoxes"]
 
-    image_data = image_file.read()
-    nparr = np.frombuffer(image_data, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
-
-    num_channels = img.shape[2] if len(img.shape) == 3 else 1
-    if num_channels == 1:
-        grayscale_image = img
-    else:
-        grayscale_image = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-
-    _, binary_image = cv2.threshold(grayscale_image, 150, 255, cv2.THRESH_BINARY_INV)
+    image = Image.open(image_file).convert("RGB")
 
     image_contours, json_outputs = [], []
     for box in bounding_boxes:
@@ -110,27 +119,21 @@ def upload_image():
             temp_coords["y2"],
         )
 
-        temp_binary_image = binary_image[y1:y2, x1:x2]
-        temp_segmented_image = segmentation.segment_image(temp_binary_image)
+        tmp_image = np.array(image)[y1:y2, x1:x2]
+        mask = seg.make_segmentation(tmp_image)
 
-        contours, _ = cv2.findContours(
-            temp_segmented_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-        )
-        extracted_lines, extracted_contours, extracted_outputs = [], [], []
+        text_regions, coords = extract_text_regions(mask, np.array(image))
 
-        for i, contour in enumerate(contours):
-            contour_mask = np.zeros_like(temp_segmented_image)
-            cv2.drawContours(contour_mask, [contour], 0, 255, -1)
-            text_line = cv2.bitwise_and(
-                temp_binary_image, temp_binary_image, mask=contour_mask
-            )
-            x, y, w, h = cv2.boundingRect(contour)
-            text_line_cropped = text_line[y : y + h, x : x + w]
-            if cv2.contourArea(contour) >= 1500:
-                extracted_lines.append(text_line_cropped)
-                extracted_contours.append([x, y, x + w, y + h])
-                output = inference.call_model(text_line_cropped)
-                extracted_outputs.append(output)
+        extracted_contours, extracted_outputs = [], []
+
+        for i in range(len(text_regions)):
+            tmp_region = text_regions[i]
+            decoded_region = ocr.make_transcription(tmp_region)
+
+            extracted_contours.append(coords[i])
+            extracted_outputs.append(decoded_region)
+
+            print(decoded_region, coords)
 
         temp_json_output = create_output(extracted_outputs, extracted_contours)
         image_contours.append([x1, y1, x2, y2])
